@@ -203,7 +203,7 @@ def crear_grafico_mensual(df):
     return fig
 
 def crear_grafico_pareto_subcuentas(df):
-    """Análisis Pareto de subcuentas"""
+    """Análisis Pareto de subcuentas con indicación del punto 80%"""
     # Calcular Pareto
     subcuentas = df.groupby('subcuenta_limpia')['monto'].sum().sort_values(ascending=False)
     subcuentas = subcuentas[subcuentas > 0]  # Solo valores positivos
@@ -212,31 +212,88 @@ def crear_grafico_pareto_subcuentas(df):
     subcuentas_pct = (subcuentas / total) * 100
     subcuentas_cumsum = subcuentas_pct.cumsum()
     
+    # Encontrar el punto exacto del 80%
+    punto_80 = None
+    subcuenta_80 = None
+    for i, (subcuenta, cum_pct) in enumerate(zip(subcuentas.index, subcuentas_cumsum.values)):
+        if cum_pct >= 80 and punto_80 is None:
+            punto_80 = i
+            subcuenta_80 = subcuenta
+            break
+    
     # Crear gráfico
     fig = go.Figure()
     
-    # Barras
+    # Barras de valores individuales
     fig.add_trace(go.Bar(
         x=subcuentas.index,
         y=subcuentas.values,
-        name='Monto',
-        marker_color='lightblue'
+        name='Monto por Subcuenta',
+        marker_color='#1f77b4',
+        hovertemplate='<b>%{x}</b><br>Monto: $%{y:,.2f} MXN<br>Porcentaje: %{customdata:.1f}%<extra></extra>',
+        customdata=subcuentas_pct.values
     ))
     
     # Línea de cumulative
     fig.add_trace(go.Scatter(
         x=subcuentas.index,
         y=subcuentas_cumsum.values,
-        name='Acumulado %',
+        name='Porcentaje Acumulado',
         yaxis='y2',
-        line=dict(color='red', width=3)
+        line=dict(color='#ff7f0e', width=3),
+        hovertemplate='<b>%{x}</b><br>Acumulado: %{y:.1f}%<extra></extra>'
     ))
     
-    # Línea del 80%
-    fig.add_hline(y=80, line_dash="dash", line_color="red")
+    # Línea horizontal del 80%
+    fig.add_hline(
+        y=80, 
+        line_dash="dash", 
+        line_color="red",
+        annotation_text="Línea 80%", 
+        annotation_position="top left"
+    )
+    
+    # Flecha y anotación del punto 80% si existe
+    if punto_80 is not None and subcuenta_80 is not None:
+        # Agregar punto en el 80%
+        fig.add_trace(go.Scatter(
+            x=[subcuenta_80],
+            y=[80],
+            mode='markers+text',
+            marker=dict(size=12, color='red', symbol='circle'),
+            text=["★ 80%"],
+            textposition="top center",
+            name='Punto 80%',
+            showlegend=False
+        ))
+        
+        # Agregar anotación con información
+        fig.add_annotation(
+            x=subcuenta_80,
+            y=85,
+            text=f"80% del gasto<br>con {punto_80 + 1} subcuentas<br>de {len(subcuentas)} totales",
+            showarrow=True,
+            arrowhead=2,
+            arrowsize=1,
+            arrowwidth=2,
+            arrowcolor="red",
+            bgcolor="white",
+            bordercolor="red",
+            borderwidth=1
+        )
+        
+        # Agregar línea vertical desde el punto 80%
+        fig.add_shape(
+            type="line",
+            x0=subcuenta_80,
+            y0=0,
+            x1=subcuenta_80,
+            y1=80,
+            line=dict(color="red", width=2, dash="dot")
+        )
     
     fig.update_layout(
-        title='📊 Análisis Pareto - Subcuentas',
+        title='📊 Análisis Pareto - Subcuentas<br><sub>Principio 80/20: Pocas subcuentas generan la mayor parte del gasto</sub>',
         xaxis_title='Subcuenta',
         yaxis_title='Monto ($ MXN)',
         yaxis2=dict(
@@ -247,8 +304,30 @@ def crear_grafico_pareto_subcuentas(df):
         ),
         height=500,
         xaxis_tickangle=-45,
-        showlegend=True
+        showlegend=True,
+        hovermode='x unified'
     )
+    
+    # Mostrar estadísticas del Pareto en un expander
+    with st.expander("📈 Estadísticas del Análisis Pareto", expanded=False):
+        if punto_80 is not None:
+            st.success(f"""
+            **🔍 Insight del Principio 80/20:**
+            
+            - **{punto_80 + 1} subcuentas** ({(punto_80 + 1)/len(subcuentas)*100:.1f}% del total) generan **80% del gasto total**
+            - **{len(subcuentas) - (punto_80 + 1)} subcuentas** ({(len(subcuentas) - (punto_80 + 1))/len(subcuentas)*100:.1f}% del total) generan solo **20% del gasto**
+            
+            **🎯 Recomendación:** Enfoca tus esfuerzos de control en las **primeras {punto_80 + 1} subcuentas** para maximizar el impacto.
+            """)
+            
+            # Mostrar las subcuentas críticas
+            st.subheader("🏆 Subcuentas Críticas (80% del gasto):")
+            subcuentas_criticas = subcuentas.head(punto_80 + 1)
+            for i, (subcuenta, monto) in enumerate(subcuentas_criticas.items(), 1):
+                porcentaje = (monto / total) * 100
+                st.write(f"{i}. **{subcuenta}**: ${monto:,.2f} MXN ({porcentaje:.1f}%)")
+        else:
+            st.warning("No se pudo calcular el punto 80% - Los datos pueden estar muy distribuidos")
     
     return fig
 
