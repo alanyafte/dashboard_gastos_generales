@@ -1,61 +1,37 @@
-# app_principal.py - VERSIÓN CON DEBUG COMPLETO
+# app_principal.py - PRUEBA DEFINITIVA
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 import gspread
 from google.oauth2 import service_account
-import warnings
-warnings.filterwarnings('ignore')
+import traceback
+from datetime import datetime
 
-st.set_page_config(page_title="Dashboard Gastos", layout="wide")
+st.set_page_config(page_title="Prueba Conexión", layout="wide")
 
-def debug_secrets():
-    """Debug completo de los secrets"""
-    st.title("🔧 Debug de Configuración")
+def prueba_conexion_definitiva():
+    """Prueba de conexión ultra-detallada"""
     
-    st.subheader("1. Secrets Disponibles:")
+    st.title("🔧 Prueba Definitiva de Conexión")
+    st.markdown("---")
+    
+    # PASO 1: Verificar secrets
+    st.subheader("1. ✅ VERIFICANDO SECRETS")
     try:
-        # Mostrar todas las keys disponibles
-        secrets_keys = list(st.secrets.keys())
-        st.write(f"Keys encontradas: {secrets_keys}")
-        
-        # Verificar SPREADSHEET_ID
-        if 'SPREADSHEET_ID' in st.secrets:
-            st.success(f"✅ SPREADSHEET_ID: {st.secrets.SPREADSHEET_ID}")
-        else:
-            st.error("❌ SPREADSHEET_ID no encontrado")
-            
-        # Verificar gcp_service_account
-        if 'gcp_service_account' in st.secrets:
-            st.success("✅ gcp_service_account encontrado")
-            gcp = st.secrets.gcp_service_account
-            st.write("Campos en gcp_service_account:", list(gcp.keys()))
-        else:
-            st.error("❌ gcp_service_account no encontrado")
-            
-    except Exception as e:
-        st.error(f"Error accediendo a secrets: {e}")
-
-def cargar_datos_seguro():
-    """Intenta cargar datos de forma segura"""
-    try:
-        # Verificar secrets básicos
-        if 'SPREADSHEET_ID' not in st.secrets:
-            st.error("SPREADSHEET_ID no encontrado en secrets")
-            return pd.DataFrame()
-            
-        if 'gcp_service_account' not in st.secrets:
-            st.error("gcp_service_account no encontrado en secrets")
-            return pd.DataFrame()
-        
-        # Obtener valores
         spreadsheet_id = st.secrets.SPREADSHEET_ID
         gcp_secrets = st.secrets.gcp_service_account
         
-        st.info(f"SPREADSHEET_ID: {spreadsheet_id}")
-        st.info(f"Client Email: {gcp_secrets.client_email}")
+        st.success("✅ SPREADSHEET_ID encontrado")
+        st.info(f"📋 ID: {spreadsheet_id}")
+        st.success("✅ gcp_service_account encontrado")
+        st.info(f"📧 Email: {gcp_secrets.client_email}")
         
-        # Crear credenciales
+    except Exception as e:
+        st.error(f"❌ Error con secrets: {e}")
+        return False
+    
+    # PASO 2: Crear credenciales
+    st.subheader("2. 🔐 CREANDO CREDENCIALES")
+    try:
         credentials_dict = {
             "type": gcp_secrets.type,
             "project_id": gcp_secrets.project_id,
@@ -73,92 +49,126 @@ def cargar_datos_seguro():
             credentials_dict,
             scopes=["https://www.googleapis.com/auth/spreadsheets"]
         )
+        st.success("✅ Credenciales creadas correctamente")
         
-        # Conectar a Google Sheets
+    except Exception as e:
+        st.error(f"❌ Error creando credenciales: {e}")
+        st.code(traceback.format_exc())
+        return False
+    
+    # PASO 3: Autorizar gspread
+    st.subheader("3. 🔑 AUTORIZANDO GSPREAD")
+    try:
         gc = gspread.authorize(credentials)
-        spreadsheet = gc.open_by_key(spreadsheet_id)
-        worksheet = spreadsheet.worksheet("registro_gastos")
-        datos = worksheet.get_all_records()
-        df = pd.DataFrame(datos)
+        st.success("✅ Gspread autorizado correctamente")
         
-        st.success(f"✅ Datos cargados: {len(df)} registros")
-        return df
+    except Exception as e:
+        st.error(f"❌ Error autorizando gspread: {e}")
+        st.code(traceback.format_exc())
+        return False
+    
+    # PASO 4: Abrir el spreadsheet
+    st.subheader("4. 📂 ABRIENGO GOOGLE SHEET")
+    try:
+        st.info(f"🔍 Intentando abrir: {spreadsheet_id}")
+        spreadsheet = gc.open_by_key(spreadsheet_id)
+        st.success("✅ Google Sheet abierto correctamente")
+        
+        # Mostrar información del sheet
+        st.info(f"📄 Título del Sheet: {spreadsheet.title}")
         
     except gspread.exceptions.SpreadsheetNotFound:
         st.error("""
-        ❌ Google Sheet no encontrado
+        ❌❌❌ GOOGLE SHEET NO ENCONTRADO ❌❌❌
         
-        **Verifica que:**
-        1. El SPREADSHEET_ID sea correcto
-        2. El Sheet esté compartido con: **gastos-generales-dash@dashboardgastosgen.iam.gserviceaccount.com**
+        **Esto significa que:**
+        1. ❌ El SPREADSHEET_ID es incorrecto O
+        2. ❌ El Sheet NO está compartido con la Service Account
+        
+        **Verifica:**
+        - ✅ SPREADSHEET_ID: 134YXDwV5Fe17Vt-tFh1GzC33f2zFVey75AALv5X-RNc
+        - ✅ Email de Service Account: gastos-generales-dash@dashboardgastosgen.iam.gserviceaccount.com
+        
+        **¿Estás SEGURO de que compartiste el Sheet correcto?**
         """)
-    except gspread.exceptions.APIError as e:
-        st.error(f"❌ Error de API: {e}")
-        st.info("Verifica los permisos de la Service Account")
+        return False
     except Exception as e:
-        st.error(f"❌ Error inesperado: {e}")
+        st.error(f"❌ Error abriendo Sheet: {e}")
+        st.code(traceback.format_exc())
+        return False
     
-    return pd.DataFrame()
-
-def main():
-    # Primero mostrar debug
-    debug_secrets()
+    # PASO 5: Acceder a la hoja
+    st.subheader("5. 📋 ACCEDIENDO A LA HOJA")
+    try:
+        worksheet = spreadsheet.worksheet("registro_gastos")
+        st.success("✅ Hoja 'registro_gastos' encontrada")
+        
+    except gspread.exceptions.WorksheetNotFound:
+        st.error("""
+        ❌ HOJA 'registro_gastos' NO ENCONTRADA
+        
+        **El Sheet existe pero la hoja no se llama 'registro_gastos'**
+        
+        **Hojas disponibles en este Sheet:"""
+        )
+        # Mostrar hojas disponibles
+        try:
+            worksheets = spreadsheet.worksheets()
+            hojas = [ws.title for ws in worksheets]
+            st.write("📑 Hojas disponibles:", hojas)
+        except:
+            st.write("No se pudieron listar las hojas")
+        return False
+    except Exception as e:
+        st.error(f"❌ Error accediendo a la hoja: {e}")
+        return False
     
-    st.markdown("---")
-    
-    # Intentar cargar datos
-    st.subheader("2. 🔄 Probando Conexión...")
-    
-    with st.spinner('Conectando con Google Sheets...'):
-        df = cargar_datos_seguro()
-    
-    if not df.empty:
-        st.success("🎉 ¡Conexión exitosa!")
-        st.subheader("3. 📊 Vista Previa de Datos:")
+    # PASO 6: Leer datos
+    st.subheader("6. 📊 LEYENDO DATOS")
+    try:
+        datos = worksheet.get_all_records()
+        df = pd.DataFrame(datos)
+        st.success(f"🎉 ¡ÉXITO! Datos cargados: {len(df)} registros")
+        
+        # Mostrar preview
+        st.subheader("📋 Vista Previa de Datos")
         st.dataframe(df.head(10))
         
-        # Métricas simples
-        st.subheader("4. 📈 Métricas Básicas:")
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Registros", len(df))
-        with col2:
-            if 'monto' in df.columns:
-                df['monto_clean'] = pd.to_numeric(df['monto'].astype(str).str.replace('$', '').str.replace(',', ''), errors='coerce')
-                total = df['monto_clean'].sum()
-                st.metric("Total", f"${total:,.2f}")
-        with col3:
-            if 'fecha' in df.columns:
-                df['fecha'] = pd.to_datetime(df['fecha'], errors='coerce')
-                dias = df['fecha'].nunique()
-                st.metric("Días", dias)
+        # Mostrar columnas
+        st.subheader("🏷️ Columnas Encontradas")
+        st.write(list(df.columns))
+        
+        return True
+        
+    except Exception as e:
+        st.error(f"❌ Error leyendo datos: {e}")
+        st.code(traceback.format_exc())
+        return False
+
+def main():
+    # Ejecutar prueba completa
+    resultado = prueba_conexion_definitiva()
     
+    if resultado:
+        st.balloons()
+        st.success("""
+        🎉 ¡CONEXIÓN EXITOSA!
+        
+        El problema está resuelto. Ahora puedes usar el dashboard completo.
+        """)
     else:
         st.error("""
-        ## 🚨 Configuración Requerida
+        🚨 **PROBLEMA NO RESUELTO**
         
-        **Problemas detectados:**
+        **Posibles causas:**
+        1. 📧 **Email incorrecto al compartir** - Verifica que compartiste con: gastos-generales-dash@dashboardgastosgen.iam.gserviceaccount.com
+        2. 🔑 **Permisos incorrectos** - Debe ser "Editor"
+        3. 📄 **Sheet incorrecto** - Verifica que sea el Sheet correcto
+        4. ⏰ **Demora en permisos** - A veces Google tarda unos minutos en aplicar los permisos
         
-        1. **Secrets mal configurados** - Verifica el formato en Streamlit Cloud
-        2. **Sheet no compartido** - Comparte con: gastos-generales-dash@dashboardgastosgen.iam.gserviceaccount.com
-        3. **SPREADSHEET_ID incorrecto** - Verifica el ID del Google Sheet
-        
-        **Formato correcto de secrets:**
-        ```toml
-        SPREADSHEET_ID = "134YXDwV5Fe17Vt-tFh1GzC33f2zFVey75AALv5X-RNc"
-        
-        [gcp_service_account]
-        type = "service_account"
-        project_id = "dashboardgastosgen"
-        private_key_id = "342d3c1bb95ab7b8662f318888967eb97a95c1c6"
-        private_key = "-----BEGIN PRIVATE KEY-----\\nMIIEvQ...\\n-----END PRIVATE KEY-----\\n"
-        client_email = "gastos-generales-dash@dashboardgastosgen.iam.gserviceaccount.com"
-        client_id = "100175800584016359802"
-        auth_uri = "https://accounts.google.com/o/oauth2/auth"
-        token_uri = "https://oauth2.googleapis.com/token"
-        auth_provider_x509_cert_url = "https://www.googleapis.com/oauth2/v1/certs"
-        client_x509_cert_url = "https://www.googleapis.com/robot/v1/metadata/x509/gastos-generales-dash%40dashboardgastosgen.iam.gserviceaccount.com"
-        ```
+        **¿Puedes:**
+        - Verificar en Google Sheets → "Compartir" que aparezca el email de la Service Account?
+        - Intentar recargar esta página en 2-3 minutos?
         """)
 
 if __name__ == "__main__":
