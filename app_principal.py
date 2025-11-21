@@ -100,7 +100,7 @@ def prueba_conexion_definitiva():
     # PASO 5: Acceder a la hoja
     st.subheader("5. 📋 ACCEDIENDO A LA HOJA")
     try:
-        worksheet = spreadsheet.worksheet("registro_general_gastos")
+        worksheet = spreadsheet.worksheet("registro_gastos")
         st.success("✅ Hoja 'registro_gastos' encontrada")
         
     except gspread.exceptions.WorksheetNotFound:
