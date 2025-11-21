@@ -40,7 +40,7 @@ def cargar_datos():
         return df
         
     except Exception as e:
-        st.error(f"❌ Error cargando datos: {e}")
+        st.error(f"Error cargando datos: {e}")
         return pd.DataFrame()
 
 def limpiar_datos(df):
@@ -82,10 +82,10 @@ def limpiar_datos(df):
         
         # Diccionario mejorado de clasificación
         categorias = {
-            'NÓMINA': ['NOMINA', 'NÓMINA', 'PAGO NOMINA'],
+            'NOMINA': ['NOMINA', 'NÓMINA', 'PAGO NOMINA'],
             'IMPUESTOS': ['ISR', 'ISN', 'IMSS', 'IMPUESTO', 'SAT'],
             'ARRENDAMIENTOS': ['ARRENDAMIENTO', 'RENTA'],
-            'MERCADERÍA': ['MAYORK', 'INTUICIÓN', 'CO TAILOR', 'REDKAP', 'MI PLAYERA', 'MERCADERIA', 'MERCANCIA'],
+            'MERCADERIA': ['MAYORK', 'INTUICION', 'CO TAILOR', 'REDKAP', 'MI PLAYERA', 'MERCADERIA', 'MERCANCIA'],
             'MATERIA_PRIMA': ['TECALSER', 'COSTUMATIC', 'MATERIA'],
             'SERVICIOS': ['SERVICIO', 'TERCEROS', 'CONTABILIDAD', 'CONSULTOR'],
             'GASTOS_OPERATIVOS': ['GASOLINA', 'VIAJES', 'OFICINA', 'SEGURO', 'VEHICULO', 'SOFTWARE'],
@@ -107,7 +107,7 @@ def limpiar_datos(df):
     return df_clean
 
 # =============================================================================
-# FUNCIONES DE GRÁFICAS INTERACTIVAS
+# FUNCIONES DE GRÁFICAS INTERACTIVAS CON IDs ÚNICOS
 # =============================================================================
 def crear_grafico_tendencias(df):
     """Gráfico de líneas con tendencias temporales"""
@@ -118,7 +118,7 @@ def crear_grafico_tendencias(df):
         df_diario,
         x='fecha',
         y='monto',
-        title='Evolución Diaria de Gastos',
+        title='Evolucion Diaria de Gastos',
         labels={'monto': 'Monto ($ MXN)', 'fecha': 'Fecha'},
         line_shape='spline'
     )
@@ -129,7 +129,7 @@ def crear_grafico_tendencias(df):
         x=df_diario['fecha'],
         y=df_diario['media_movil'],
         mode='lines',
-        name='Media Móvil (7 días)',
+        name='Media Movil (7 dias)',
         line=dict(dash='dash', color='red')
     ))
     
@@ -160,7 +160,7 @@ def crear_grafico_torta_formas_pago(df):
     fig = px.pie(
         values=formas_pago.values,
         names=formas_pago.index,
-        title='Distribución por Forma de Pago',
+        title='Distribucion por Forma de Pago',
         hole=0.4
     )
     
@@ -249,7 +249,7 @@ def crear_grafico_pareto_subcuentas(df):
         y=80, 
         line_dash="dash", 
         line_color="red",
-        annotation_text="Línea 80%", 
+        annotation_text="Linea 80%", 
         annotation_position="top left"
     )
     
@@ -261,26 +261,11 @@ def crear_grafico_pareto_subcuentas(df):
             y=[80],
             mode='markers+text',
             marker=dict(size=12, color='red', symbol='circle'),
-            text=["★ 80%"],
+            text=["80%"],
             textposition="top center",
             name='Punto 80%',
             showlegend=False
         ))
-        
-        # Agregar anotación con información
-        #fig.add_annotation(
-            #x=subcuenta_80,
-            #y=85,
-            #text=f"80% del gasto<br>con {punto_80 + 1} subcuentas<br>de {len(subcuentas)} totales",
-            #showarrow=True,
-            #arrowhead=2,
-            #arrowsize=1,
-            #arrowwidth=2,
-            #arrowcolor="red",
-            #bgcolor="white",
-            #bordercolor="red",
-            #borderwidth=1
-        #)
         
         # Agregar línea vertical desde el punto 80%
         fig.add_shape(
@@ -293,7 +278,7 @@ def crear_grafico_pareto_subcuentas(df):
         )
     
     fig.update_layout(
-        title='Análisis Pareto - Subcuentas<br><sub>Principio 80/20: Pocas subcuentas generan la mayor parte del gasto</sub>',
+        title='Analisis Pareto - Subcuentas<br><sub>Principio 80/20: Pocas subcuentas generan la mayor parte del gasto</sub>',
         xaxis_title='Subcuenta',
         yaxis_title='Monto ($ MXN)',
         yaxis2=dict(
@@ -309,19 +294,19 @@ def crear_grafico_pareto_subcuentas(df):
     )
     
     # Mostrar estadísticas del Pareto en un expander
-    with st.expander("Estadísticas del Análisis Pareto", expanded=False):
+    with st.expander("Estadisticas del Analisis Pareto", expanded=False):
         if punto_80 is not None:
             st.success(f"""
-            **🔍 Insight del Principio 80/20:**
+            **Insight del Principio 80/20:**
             
             - **{punto_80 + 1} subcuentas** ({(punto_80 + 1)/len(subcuentas)*100:.1f}% del total) generan **80% del gasto total**
             - **{len(subcuentas) - (punto_80 + 1)} subcuentas** ({(len(subcuentas) - (punto_80 + 1))/len(subcuentas)*100:.1f}% del total) generan solo **20% del gasto**
             
-            **Recomendación:** Enfoca tus esfuerzos de control en las **primeras {punto_80 + 1} subcuentas** para maximizar el impacto.
+            **Recomendacion:** Enfoca tus esfuerzos de control en las **primeras {punto_80 + 1} subcuentas** para maximizar el impacto.
             """)
             
             # Mostrar las subcuentas críticas
-            st.subheader("Subcuentas Críticas (80% del gasto):")
+            st.subheader("Subcuentas Criticas (80% del gasto):")
             subcuentas_criticas = subcuentas.head(punto_80 + 1)
             for i, (subcuenta, monto) in enumerate(subcuentas_criticas.items(), 1):
                 porcentaje = (monto / total) * 100
@@ -340,41 +325,12 @@ def crear_grafico_dispersion(df):
         color='cuenta_principal',
         size='monto',
         hover_data=['proveedor', 'descripcion'],
-        title='Dispersión de Transacciones',
+        title='Dispersion de Transacciones',
         labels={'monto': 'Monto ($ MXN)', 'fecha': 'Fecha', 'cuenta_principal': 'Cuenta Principal'}
     )
     
     fig.update_layout(height=500, xaxis=dict(rangeslider=dict(visible=True)))
     return fig
-
-def crear_heatmap_semanal(df):
-    """Heatmap de patrones semanales"""
-    df_heatmap = df.copy()
-    df_heatmap['dia_semana'] = df_heatmap['fecha'].dt.day_name()
-    df_heatmap['semana'] = df_heatmap['fecha'].dt.isocalendar().week
-    
-    # Ordenar días de la semana
-    dias_orden = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-    df_heatmap['dia_semana'] = pd.Categorical(df_heatmap['dia_semana'], categories=dias_orden, ordered=True)
-    
-    # Preparar datos para heatmap
-    heatmap_data = df_heatmap.groupby(['semana', 'dia_semana'])['monto'].sum().unstack(fill_value=0)
-    
-    fig = px.imshow(
-        heatmap_data.T,  # Transponer para días en Y, semanas en X
-        title='Patrón Semanal de Gastos',
-        labels=dict(x="Semana", y="Día de la Semana", color="Monto"),
-        aspect="auto",
-        color_continuous_scale="Blues"
-    )
-    
-    fig.update_layout(height=400)
-    return fig
-
-
-# =============================================================================
-# GRÁFICOS FALTANTES - AGREGAR AL CÓDIGO EXISTENTE
-# =============================================================================
 
 def crear_grafico_tendencias_cuentas(df):
     """Crea gráfico de líneas para tendencias de cuentas principales"""
@@ -386,7 +342,7 @@ def crear_grafico_tendencias_cuentas(df):
         x='fecha',
         y='monto',
         color='cuenta_principal',
-        title='📊 Tendencias por Cuenta Principal - Líneas Temporales',
+        title='Tendencias por Cuenta Principal - Lineas Temporales',
         labels={'monto': 'Monto Diario ($ MXN)', 'fecha': 'Fecha', 'cuenta_principal': 'Cuenta Principal'},
         hover_data={'monto': ':.2f'}
     )
@@ -415,7 +371,7 @@ def crear_grafico_area_apilada(df):
         x='fecha',
         y='monto',
         color='cuenta_principal',
-        title='📈 Composición Diaria de Gastos - Área Apilada',
+        title='Composicion Diaria de Gastos - Area Apilada',
         labels={'monto': 'Monto Acumulado ($ MXN)', 'fecha': 'Fecha', 'cuenta_principal': 'Cuenta Principal'}
     )
     
@@ -426,8 +382,8 @@ def crear_grafico_area_apilada(df):
     )
     return fig
 
-def crear_heatmap_semanal(df):
-    """Crea heatmap de patrones semanales"""
+def crear_heatmap_semanal_avanzado(df):
+    """Crea heatmap de patrones semanales (versión avanzada)"""
     df_heatmap = df.copy()
     df_heatmap['dia_semana'] = df_heatmap['fecha'].dt.day_name()
     df_heatmap['semana'] = df_heatmap['fecha'].dt.isocalendar().week
@@ -440,9 +396,9 @@ def crear_heatmap_semanal(df):
     heatmap_data = df_heatmap.groupby(['semana', 'dia_semana'])['monto'].sum().unstack(fill_value=0)
     
     fig = px.imshow(
-        heatmap_data.T,  # Transponer para días en Y
-        title='🔥 Patrón Semanal de Gastos',
-        labels=dict(x="Semana", y="Día de la Semana", color="Monto"),
+        heatmap_data.T,
+        title='Patron Semanal de Gastos',
+        labels=dict(x="Semana", y="Dia de la Semana", color="Monto"),
         aspect="auto",
         color_continuous_scale="Blues"
     )
@@ -466,7 +422,7 @@ def crear_grafico_crecimiento_mensual(df):
         x='mes',
         y='crecimiento',
         color='cuenta_principal',
-        title='📊 Crecimiento Porcentual Mensual',
+        title='Crecimiento Porcentual Mensual',
         labels={'crecimiento': 'Crecimiento (%)', 'mes': 'Mes', 'cuenta_principal': 'Cuenta Principal'},
         markers=True
     )
@@ -488,7 +444,7 @@ def crear_treemap_subcuentas(df):
         df,
         path=['cuenta_principal', 'subcuenta_limpia'],
         values='monto',
-        title='🌳 Mapa de Árbol de Gastos por Cuenta y Subcuenta',
+        title='Mapa de Arbol de Gastos por Cuenta y Subcuenta',
         color='monto',
         color_continuous_scale='Blues'
     )
@@ -505,7 +461,7 @@ def crear_treemap_subcuentas(df):
 def main():
     # Header
     st.title("Dashboard de Gastos Generales")
-    st.markdown("Análisis interactivo en tiempo real - Actualizado automáticamente")
+    st.markdown("Analisis interactivo en tiempo real - Actualizado automaticamente")
     st.markdown("---")
     
     # Cargar datos
@@ -513,13 +469,13 @@ def main():
         df_raw = cargar_datos()
         
     if df_raw.empty:
-        st.error("❌ No se pudieron cargar los datos.")
+        st.error("No se pudieron cargar los datos.")
         return
         
     df = limpiar_datos(df_raw)
     
     if df.empty:
-        st.error("❌ No hay datos válidos después de la limpieza.")
+        st.error("No hay datos validos despues de la limpieza.")
         return
     
     # =========================================================================
@@ -533,7 +489,7 @@ def main():
     
     st.sidebar.subheader("Rango de Fechas")
     rango_fechas = st.sidebar.date_input(
-        "Selecciona el período:",
+        "Selecciona el periodo:",
         value=(fecha_min, fecha_max),
         min_value=fecha_min,
         max_value=fecha_max
@@ -573,7 +529,7 @@ def main():
     # =========================================================================
     # MÉTRICAS PRINCIPALES
     # =========================================================================
-    st.header("Métricas Principales")
+    st.header("Metricas Principales")
     
     col1, col2, col3, col4 = st.columns(4)
     
@@ -587,11 +543,11 @@ def main():
     
     with col3:
         promedio = df['monto'].mean()
-        st.metric("Promedio por Transacción", f"${promedio:,.2f} MXN")
+        st.metric("Promedio por Transaccion", f"${promedio:,.2f} MXN")
     
     with col4:
         dias_activos = df['fecha'].nunique()
-        st.metric("Días con Actividad", dias_activos)
+        st.metric("Dias con Actividad", dias_activos)
     
     st.markdown("---")
     
@@ -600,58 +556,57 @@ def main():
     # =========================================================================
     
     # SECCIÓN 1: Tendencias Temporales
-    st.header("Análisis Temporal")
+    st.header("Analisis Temporal")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        st.plotly_chart(crear_grafico_tendencias(df), use_container_width=True)
+        st.plotly_chart(crear_grafico_tendencias(df), use_container_width=True, key="tendencias_1")
     
     with col2:
-        st.plotly_chart(crear_grafico_mensual(df), use_container_width=True)
+        st.plotly_chart(crear_grafico_mensual(df), use_container_width=True, key="mensual_1")
     
     # SECCIÓN 2: Distribución por Categorías
-    st.header("Análisis por Categorías")
+    st.header("Analisis por Categorias")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        st.plotly_chart(crear_grafico_barras_cuentas(df), use_container_width=True)
+        st.plotly_chart(crear_grafico_barras_cuentas(df), use_container_width=True, key="barras_1")
     
     with col2:
-        st.plotly_chart(crear_grafico_torta_formas_pago(df), use_container_width=True)
+        st.plotly_chart(crear_grafico_torta_formas_pago(df), use_container_width=True, key="torta_1")
     
     # SECCIÓN 3: Análisis Pareto
-    st.header("Análisis Pareto")
-    st.plotly_chart(crear_grafico_pareto_subcuentas(df), use_container_width=True)
+    st.header("Analisis Pareto")
+    st.plotly_chart(crear_grafico_pareto_subcuentas(df), use_container_width=True, key="pareto_1")
     
     # SECCIÓN 4: Top Proveedores
-    st.header("Análisis de Proveedores")
-    st.plotly_chart(crear_grafico_top_proveedores(df), use_container_width=True)
+    st.header("Analisis de Proveedores")
+    st.plotly_chart(crear_grafico_top_proveedores(df), use_container_width=True, key="proveedores_1")
     
     # SECCIÓN 5: Análisis Detallado
-    st.header("Análisis Detallado")
+    st.header("Analisis Detallado")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        st.plotly_chart(crear_grafico_dispersion(df), use_container_width=True)
+        st.plotly_chart(crear_grafico_dispersion(df), use_container_width=True, key="dispersion_1")
     
     with col2:
-        st.plotly_chart(crear_heatmap_semanal(df), use_container_width=True)
-    
+        st.plotly_chart(crear_heatmap_semanal_avanzado(df), use_container_width=True, key="heatmap_1")
     
     # =========================================================================
     # NUEVA SECCIÓN: ANÁLISIS AVANZADO
     # =========================================================================
-    st.header("🔍 Análisis Avanzado")
+    st.header("Analisis Avanzado")
 
     # Pestañas para organizar los gráficos avanzados
     tab1, tab2, tab3, tab4 = st.tabs([
-        "📈 Tendencias Detalladas", 
-        "🔥 Patrones Semanales", 
-        "📊 Crecimiento", 
-        "🌳 Estructura"
+        "Tendencias Detalladas", 
+        "Patrones Semanales", 
+        "Crecimiento", 
+        "Estructura"
     ])
     
     with tab1:
@@ -659,33 +614,34 @@ def main():
         col1, col2 = st.columns(2)
         
         with col1:
-            st.plotly_chart(crear_grafico_tendencias_cuentas(df), use_container_width=True)
+            st.plotly_chart(crear_grafico_tendencias_cuentas(df), use_container_width=True, key="tendencias_cuentas_1")
         
         with col2:
-            st.plotly_chart(crear_grafico_area_apilada(df), use_container_width=True)
+            st.plotly_chart(crear_grafico_area_apilada(df), use_container_width=True, key="area_apilada_1")
     
     with tab2:
         st.subheader("Patrones de Comportamiento Semanal")
-        st.plotly_chart(crear_heatmap_semanal(df), use_container_width=True)
+        st.plotly_chart(crear_heatmap_semanal_avanzado(df), use_container_width=True, key="heatmap_avanzado_1")
         
         # Estadísticas semanales
         col1, col2, col3 = st.columns(3)
         with col1:
-            df['dia_semana'] = df['fecha'].dt.day_name()
-            dia_max = df.groupby('dia_semana')['monto'].sum().idxmax()
-            st.metric("Día de Mayor Gasto", dia_max)
+            df_temp = df.copy()
+            df_temp['dia_semana'] = df_temp['fecha'].dt.day_name()
+            dia_max = df_temp.groupby('dia_semana')['monto'].sum().idxmax()
+            st.metric("Dia de Mayor Gasto", dia_max)
         
         with col2:
-            promedio_diario = df.groupby('dia_semana')['monto'].mean().mean()
+            promedio_diario = df_temp.groupby('dia_semana')['monto'].mean().mean()
             st.metric("Promedio Diario", f"${promedio_diario:,.2f}")
         
         with col3:
             dias_activos = df['fecha'].nunique()
-            st.metric("Días Analizados", dias_activos)
+            st.metric("Dias Analizados", dias_activos)
     
     with tab3:
-        st.subheader("Análisis de Crecimiento Mensual")
-        st.plotly_chart(crear_grafico_crecimiento_mensual(df), use_container_width=True)
+        st.subheader("Analisis de Crecimiento Mensual")
+        st.plotly_chart(crear_grafico_crecimiento_mensual(df), use_container_width=True, key="crecimiento_1")
         
         # Métricas de crecimiento
         df_mensual = df.copy()
@@ -705,7 +661,7 @@ def main():
     
     with tab4:
         st.subheader("Estructura de Gastos")
-        st.plotly_chart(crear_treemap_subcuentas(df), use_container_width=True)
+        st.plotly_chart(crear_treemap_subcuentas(df), use_container_width=True, key="treemap_1")
         
         # Estadísticas de estructura
         col1, col2 = st.columns(2)
@@ -715,7 +671,7 @@ def main():
         
         with col2:
             subcuentas_unicas = df['subcuenta_limpia'].nunique()
-            st.metric("Subcuentas Únicas", subcuentas_unicas)
+            st.metric("Subcuentas Unicas", subcuentas_unicas)
         
     # =========================================================================
     # TABLA DE DATOS
@@ -725,7 +681,7 @@ def main():
     # Opciones de visualización
     col1, col2 = st.columns(2)
     with col1:
-        filas_mostrar = st.slider("Número de filas a mostrar:", 10, 100, 20)
+        filas_mostrar = st.slider("Numero de filas a mostrar:", 10, 100, 20)
     with col2:
         columna_orden = st.selectbox("Ordenar por:", 
                                    ['fecha', 'monto', 'proveedor', 'cuenta_principal'])
@@ -764,11 +720,11 @@ def main():
     st.sidebar.markdown("---")
     st.sidebar.info(
         f"""
-        **ℹ️ Información del Dataset**
-        - **Período:** {df['fecha'].min().strftime('%d/%m/%Y')} - {df['fecha'].max().strftime('%d/%m/%Y')}
+        **Informacion del Dataset**
+        - **Periodo:** {df['fecha'].min().strftime('%d/%m/%Y')} - {df['fecha'].max().strftime('%d/%m/%Y')}
         - **Transacciones:** {len(df):,}
         - **Total:** ${df['monto'].sum():,.2f} MXN
-        - **Última actualización:** {datetime.now().strftime('%d/%m/%Y %H:%M')}
+        - **Ultima actualizacion:** {datetime.now().strftime('%d/%m/%Y %H:%M')}
         """
     )
 
