@@ -371,6 +371,134 @@ def crear_heatmap_semanal(df):
     fig.update_layout(height=400)
     return fig
 
+
+# =============================================================================
+# GRÁFICOS FALTANTES - AGREGAR AL CÓDIGO EXISTENTE
+# =============================================================================
+
+def crear_grafico_tendencias_cuentas(df):
+    """Crea gráfico de líneas para tendencias de cuentas principales"""
+    df_tendencias = df.groupby([df['fecha'].dt.date, 'cuenta_principal'])['monto'].sum().reset_index()
+    df_tendencias['fecha'] = pd.to_datetime(df_tendencias['fecha'])
+    
+    fig = px.line(
+        df_tendencias,
+        x='fecha',
+        y='monto',
+        color='cuenta_principal',
+        title='📊 Tendencias por Cuenta Principal - Líneas Temporales',
+        labels={'monto': 'Monto Diario ($ MXN)', 'fecha': 'Fecha', 'cuenta_principal': 'Cuenta Principal'},
+        hover_data={'monto': ':.2f'}
+    )
+    
+    fig.update_layout(
+        height=400,
+        template='plotly_white',
+        hovermode='x unified',
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        )
+    )
+    return fig
+
+def crear_grafico_area_apilada(df):
+    """Crea gráfico de área apilada para ver contribución"""
+    df_tendencias = df.groupby([df['fecha'].dt.date, 'cuenta_principal'])['monto'].sum().reset_index()
+    df_tendencias['fecha'] = pd.to_datetime(df_tendencias['fecha'])
+    
+    fig = px.area(
+        df_tendencias,
+        x='fecha',
+        y='monto',
+        color='cuenta_principal',
+        title='📈 Composición Diaria de Gastos - Área Apilada',
+        labels={'monto': 'Monto Acumulado ($ MXN)', 'fecha': 'Fecha', 'cuenta_principal': 'Cuenta Principal'}
+    )
+    
+    fig.update_layout(
+        height=400,
+        template='plotly_white',
+        hovermode='x unified'
+    )
+    return fig
+
+def crear_heatmap_semanal(df):
+    """Crea heatmap de patrones semanales"""
+    df_heatmap = df.copy()
+    df_heatmap['dia_semana'] = df_heatmap['fecha'].dt.day_name()
+    df_heatmap['semana'] = df_heatmap['fecha'].dt.isocalendar().week
+    
+    # Mapear días de la semana en orden
+    dias_orden = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    df_heatmap['dia_semana'] = pd.Categorical(df_heatmap['dia_semana'], categories=dias_orden, ordered=True)
+    
+    # Agrupar por semana y día
+    heatmap_data = df_heatmap.groupby(['semana', 'dia_semana'])['monto'].sum().unstack(fill_value=0)
+    
+    fig = px.imshow(
+        heatmap_data.T,  # Transponer para días en Y
+        title='🔥 Patrón Semanal de Gastos',
+        labels=dict(x="Semana", y="Día de la Semana", color="Monto"),
+        aspect="auto",
+        color_continuous_scale="Blues"
+    )
+    
+    fig.update_layout(height=400)
+    return fig
+
+def crear_grafico_crecimiento_mensual(df):
+    """Crea gráfico de crecimiento mensual"""
+    df_mensual = df.copy()
+    df_mensual['mes'] = df_mensual['fecha'].dt.to_period('M').astype(str)
+    df_mensual = df_mensual.groupby(['mes', 'cuenta_principal'])['monto'].sum().reset_index()
+    df_mensual['mes'] = pd.to_datetime(df_mensual['mes'])
+    
+    # Calcular crecimiento
+    df_mensual = df_mensual.sort_values(['cuenta_principal', 'mes'])
+    df_mensual['crecimiento'] = df_mensual.groupby('cuenta_principal')['monto'].pct_change() * 100
+    
+    fig = px.line(
+        df_mensual.dropna(),
+        x='mes',
+        y='crecimiento',
+        color='cuenta_principal',
+        title='📊 Crecimiento Porcentual Mensual',
+        labels={'crecimiento': 'Crecimiento (%)', 'mes': 'Mes', 'cuenta_principal': 'Cuenta Principal'},
+        markers=True
+    )
+    
+    fig.add_hline(y=0, line_dash="dash", line_color="red", opacity=0.5)
+    
+    fig.update_layout(
+        height=400,
+        template='plotly_white',
+        xaxis=dict(tickformat="%b %Y"),
+        hovermode='x unified',
+        yaxis=dict(ticksuffix="%")
+    )
+    return fig
+
+def crear_treemap_subcuentas(df):
+    """Crea gráfico de árbol de subcuentas"""
+    fig = px.treemap(
+        df,
+        path=['cuenta_principal', 'subcuenta_limpia'],
+        values='monto',
+        title='🌳 Mapa de Árbol de Gastos por Cuenta y Subcuenta',
+        color='monto',
+        color_continuous_scale='Blues'
+    )
+    
+    fig.update_layout(height=500)
+    fig.update_traces(
+        hovertemplate='<b>%{label}</b><br>Monto Total: $%{value:,.2f} MXN<extra></extra>'
+    )
+    return fig
+
 # =============================================================================
 # INTERFAZ PRINCIPAL
 # =============================================================================
@@ -512,6 +640,83 @@ def main():
     with col2:
         st.plotly_chart(crear_heatmap_semanal(df), use_container_width=True)
     
+    
+    # =========================================================================
+    # NUEVA SECCIÓN: ANÁLISIS AVANZADO
+    # =========================================================================
+    st.header("🔍 Análisis Avanzado")
+
+    # Pestañas para organizar los gráficos avanzados
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "📈 Tendencias Detalladas", 
+        "🔥 Patrones Semanales", 
+        "📊 Crecimiento", 
+        "🌳 Estructura"
+    ])
+    
+    with tab1:
+        st.subheader("Tendencias por Cuenta Principal")
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.plotly_chart(crear_grafico_tendencias_cuentas(df), use_container_width=True)
+        
+        with col2:
+            st.plotly_chart(crear_grafico_area_apilada(df), use_container_width=True)
+    
+    with tab2:
+        st.subheader("Patrones de Comportamiento Semanal")
+        st.plotly_chart(crear_heatmap_semanal(df), use_container_width=True)
+        
+        # Estadísticas semanales
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            df['dia_semana'] = df['fecha'].dt.day_name()
+            dia_max = df.groupby('dia_semana')['monto'].sum().idxmax()
+            st.metric("Día de Mayor Gasto", dia_max)
+        
+        with col2:
+            promedio_diario = df.groupby('dia_semana')['monto'].mean().mean()
+            st.metric("Promedio Diario", f"${promedio_diario:,.2f}")
+        
+        with col3:
+            dias_activos = df['fecha'].nunique()
+            st.metric("Días Analizados", dias_activos)
+    
+    with tab3:
+        st.subheader("Análisis de Crecimiento Mensual")
+        st.plotly_chart(crear_grafico_crecimiento_mensual(df), use_container_width=True)
+        
+        # Métricas de crecimiento
+        df_mensual = df.copy()
+        df_mensual['mes'] = df_mensual['fecha'].dt.to_period('M')
+        crecimiento_data = df_mensual.groupby('mes')['monto'].sum().pct_change().dropna()
+        
+        if not crecimiento_data.empty:
+            col1, col2 = st.columns(2)
+            with col1:
+                crecimiento_promedio = crecimiento_data.mean() * 100
+                st.metric("Crecimiento Mensual Promedio", f"{crecimiento_promedio:+.1f}%")
+            
+            with col2:
+                meses_crecimiento = (crecimiento_data > 0).sum()
+                total_meses = len(crecimiento_data)
+                st.metric("Meses con Crecimiento", f"{meses_crecimiento}/{total_meses}")
+    
+    with tab4:
+        st.subheader("Estructura de Gastos")
+        st.plotly_chart(crear_treemap_subcuentas(df), use_container_width=True)
+        
+        # Estadísticas de estructura
+        col1, col2 = st.columns(2)
+        with col1:
+            cuentas_unicas = df['cuenta_principal'].nunique()
+            st.metric("Cuentas Principales", cuentas_unicas)
+        
+        with col2:
+            subcuentas_unicas = df['subcuenta_limpia'].nunique()
+            st.metric("Subcuentas Únicas", subcuentas_unicas)
+        
     # =========================================================================
     # TABLA DE DATOS
     # =========================================================================
