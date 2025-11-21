@@ -533,24 +533,42 @@ def main():
     # MÉTRICAS PRINCIPALES
     # =========================================================================
     st.header("Metricas Principales")
-    
-    col1, col2, col3, col4 = st.columns([1.2, 1, 1, 1])
+
+    # Usar 2 filas de 2 columnas cada una
+    col1, col2 = st.columns(2)
+    col3, col4 = st.columns(2)
     
     with col1:
         total_gastado = df['monto'].sum()
-        st.metric("Total Gastado", f"${total_gastado:,.2f} MXN")
+        st.metric(
+            label="Total Gastado", 
+            value=f"${total_gastado:,.2f}",
+            delta=None
+        )
     
     with col2:
         transacciones = len(df)
-        st.metric("Transacciones", f"{transacciones:,}")
+        st.metric(
+            label="Total Transacciones", 
+            value=f"{transacciones:,}",
+            delta=None
+        )
     
     with col3:
         promedio = df['monto'].mean()
-        st.metric("Promedio por Transaccion", f"${promedio:,.2f} MXN")
+        st.metric(
+            label="Promedio por Transaccion", 
+            value=f"${promedio:,.2f}",
+            delta=None
+        )
     
     with col4:
         dias_activos = df['fecha'].nunique()
-        st.metric("Dias con Actividad", dias_activos)
+        st.metric(
+            label="Dias con Actividad", 
+            value=dias_activos,
+            delta=None
+        )
     
     st.markdown("---")
     
