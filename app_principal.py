@@ -534,7 +534,7 @@ def main():
     # =========================================================================
     st.header("Metricas Principales")
     
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3, col4 = st.columns([1.2, 1, 1, 1])
     
     with col1:
         total_gastado = df['monto'].sum()
