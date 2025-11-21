@@ -118,7 +118,7 @@ def crear_grafico_tendencias(df):
         df_diario,
         x='fecha',
         y='monto',
-        title='📈 Evolución Diaria de Gastos',
+        title='Evolución Diaria de Gastos',
         labels={'monto': 'Monto ($ MXN)', 'fecha': 'Fecha'},
         line_shape='spline'
     )
@@ -144,7 +144,7 @@ def crear_grafico_barras_cuentas(df):
         x=gastos_cuenta.values,
         y=gastos_cuenta.index,
         orientation='h',
-        title='🏷️ Gastos por Cuenta Principal',
+        title='Gastos por Cuenta Principal',
         labels={'x': 'Monto ($ MXN)', 'y': 'Cuenta'},
         color=gastos_cuenta.values,
         color_continuous_scale='viridis'
@@ -160,7 +160,7 @@ def crear_grafico_torta_formas_pago(df):
     fig = px.pie(
         values=formas_pago.values,
         names=formas_pago.index,
-        title='💳 Distribución por Forma de Pago',
+        title='Distribución por Forma de Pago',
         hole=0.4
     )
     
@@ -175,7 +175,7 @@ def crear_grafico_top_proveedores(df):
         x=top_proveedores.values,
         y=top_proveedores.index,
         orientation='h',
-        title='🏢 Top 15 Proveedores por Monto',
+        title='Top 15 Proveedores por Monto',
         labels={'x': 'Monto ($ MXN)', 'y': 'Proveedor'},
         color=top_proveedores.values,
         color_continuous_scale='plasma'
@@ -195,7 +195,7 @@ def crear_grafico_mensual(df):
         x='mes',
         y='monto',
         color='cuenta_principal',
-        title='📅 Gastos Mensuales por Cuenta Principal',
+        title='Gastos Mensuales por Cuenta Principal',
         labels={'monto': 'Monto ($ MXN)', 'mes': 'Mes', 'cuenta_principal': 'Cuenta'}
     )
     
@@ -293,7 +293,7 @@ def crear_grafico_pareto_subcuentas(df):
         )
     
     fig.update_layout(
-        title='📊 Análisis Pareto - Subcuentas<br><sub>Principio 80/20: Pocas subcuentas generan la mayor parte del gasto</sub>',
+        title='Análisis Pareto - Subcuentas<br><sub>Principio 80/20: Pocas subcuentas generan la mayor parte del gasto</sub>',
         xaxis_title='Subcuenta',
         yaxis_title='Monto ($ MXN)',
         yaxis2=dict(
@@ -309,7 +309,7 @@ def crear_grafico_pareto_subcuentas(df):
     )
     
     # Mostrar estadísticas del Pareto en un expander
-    with st.expander("📈 Estadísticas del Análisis Pareto", expanded=False):
+    with st.expander("Estadísticas del Análisis Pareto", expanded=False):
         if punto_80 is not None:
             st.success(f"""
             **🔍 Insight del Principio 80/20:**
@@ -317,11 +317,11 @@ def crear_grafico_pareto_subcuentas(df):
             - **{punto_80 + 1} subcuentas** ({(punto_80 + 1)/len(subcuentas)*100:.1f}% del total) generan **80% del gasto total**
             - **{len(subcuentas) - (punto_80 + 1)} subcuentas** ({(len(subcuentas) - (punto_80 + 1))/len(subcuentas)*100:.1f}% del total) generan solo **20% del gasto**
             
-            **🎯 Recomendación:** Enfoca tus esfuerzos de control en las **primeras {punto_80 + 1} subcuentas** para maximizar el impacto.
+            **Recomendación:** Enfoca tus esfuerzos de control en las **primeras {punto_80 + 1} subcuentas** para maximizar el impacto.
             """)
             
             # Mostrar las subcuentas críticas
-            st.subheader("🏆 Subcuentas Críticas (80% del gasto):")
+            st.subheader("Subcuentas Críticas (80% del gasto):")
             subcuentas_criticas = subcuentas.head(punto_80 + 1)
             for i, (subcuenta, monto) in enumerate(subcuentas_criticas.items(), 1):
                 porcentaje = (monto / total) * 100
@@ -340,7 +340,7 @@ def crear_grafico_dispersion(df):
         color='cuenta_principal',
         size='monto',
         hover_data=['proveedor', 'descripcion'],
-        title='🎯 Dispersión de Transacciones',
+        title='Dispersión de Transacciones',
         labels={'monto': 'Monto ($ MXN)', 'fecha': 'Fecha', 'cuenta_principal': 'Cuenta Principal'}
     )
     
@@ -362,7 +362,7 @@ def crear_heatmap_semanal(df):
     
     fig = px.imshow(
         heatmap_data.T,  # Transponer para días en Y, semanas en X
-        title='🔥 Patrón Semanal de Gastos',
+        title='Patrón Semanal de Gastos',
         labels=dict(x="Semana", y="Día de la Semana", color="Monto"),
         aspect="auto",
         color_continuous_scale="Blues"
@@ -376,12 +376,12 @@ def crear_heatmap_semanal(df):
 # =============================================================================
 def main():
     # Header
-    st.title("🚀 Dashboard de Gastos Generales")
+    st.title("Dashboard de Gastos Generales")
     st.markdown("Análisis interactivo en tiempo real - Actualizado automáticamente")
     st.markdown("---")
     
     # Cargar datos
-    with st.spinner('📥 Cargando datos desde Google Sheets...'):
+    with st.spinner('Cargando datos desde Google Sheets...'):
         df_raw = cargar_datos()
         
     if df_raw.empty:
@@ -397,13 +397,13 @@ def main():
     # =========================================================================
     # SIDEBAR - FILTROS
     # =========================================================================
-    st.sidebar.title("🎛️ Panel de Control")
+    st.sidebar.title("Panel de Control")
     
     # Filtro de fechas
     fecha_min = df['fecha'].min().date()
     fecha_max = df['fecha'].max().date()
     
-    st.sidebar.subheader("📅 Rango de Fechas")
+    st.sidebar.subheader("Rango de Fechas")
     rango_fechas = st.sidebar.date_input(
         "Selecciona el período:",
         value=(fecha_min, fecha_max),
@@ -416,7 +416,7 @@ def main():
                 (df['fecha'].dt.date <= rango_fechas[1])]
     
     # Filtro de cuentas
-    st.sidebar.subheader("🏷️ Filtro por Cuenta")
+    st.sidebar.subheader("Filtro por Cuenta")
     cuentas = ['TODAS'] + sorted(df['cuenta_principal'].unique().tolist())
     cuenta_seleccionada = st.sidebar.selectbox("Cuenta principal:", cuentas)
     
@@ -424,7 +424,7 @@ def main():
         df = df[df['cuenta_principal'] == cuenta_seleccionada]
     
     # Filtro de formas de pago
-    st.sidebar.subheader("💳 Filtro por Forma de Pago")
+    st.sidebar.subheader("Filtro por Forma de Pago")
     formas_pago = ['TODAS'] + sorted(df['forma_pago'].unique().tolist())
     forma_pago_seleccionada = st.sidebar.selectbox("Forma de pago:", formas_pago)
     
@@ -432,7 +432,7 @@ def main():
         df = df[df['forma_pago'] == forma_pago_seleccionada]
     
     # Filtro de montos
-    st.sidebar.subheader("💰 Filtro por Monto")
+    st.sidebar.subheader("Filtro por Monto")
     monto_min, monto_max = st.sidebar.slider(
         "Rango de montos ($ MXN):",
         min_value=float(df['monto'].min()),
@@ -445,7 +445,7 @@ def main():
     # =========================================================================
     # MÉTRICAS PRINCIPALES
     # =========================================================================
-    st.header("📊 Métricas Principales")
+    st.header("Métricas Principales")
     
     col1, col2, col3, col4 = st.columns(4)
     
@@ -472,7 +472,7 @@ def main():
     # =========================================================================
     
     # SECCIÓN 1: Tendencias Temporales
-    st.header("📈 Análisis Temporal")
+    st.header("Análisis Temporal")
     
     col1, col2 = st.columns(2)
     
@@ -483,7 +483,7 @@ def main():
         st.plotly_chart(crear_grafico_mensual(df), use_container_width=True)
     
     # SECCIÓN 2: Distribución por Categorías
-    st.header("🏷️ Análisis por Categorías")
+    st.header("Análisis por Categorías")
     
     col1, col2 = st.columns(2)
     
@@ -494,15 +494,15 @@ def main():
         st.plotly_chart(crear_grafico_torta_formas_pago(df), use_container_width=True)
     
     # SECCIÓN 3: Análisis Pareto
-    st.header("📊 Análisis Pareto")
+    st.header("Análisis Pareto")
     st.plotly_chart(crear_grafico_pareto_subcuentas(df), use_container_width=True)
     
     # SECCIÓN 4: Top Proveedores
-    st.header("🏢 Análisis de Proveedores")
+    st.header("Análisis de Proveedores")
     st.plotly_chart(crear_grafico_top_proveedores(df), use_container_width=True)
     
     # SECCIÓN 5: Análisis Detallado
-    st.header("🎯 Análisis Detallado")
+    st.header("Análisis Detallado")
     
     col1, col2 = st.columns(2)
     
@@ -515,7 +515,7 @@ def main():
     # =========================================================================
     # TABLA DE DATOS
     # =========================================================================
-    st.header("📋 Detalle de Transacciones")
+    st.header("Detalle de Transacciones")
     
     # Opciones de visualización
     col1, col2 = st.columns(2)
@@ -543,13 +543,13 @@ def main():
     # EXPORTACIÓN Y INFO
     # =========================================================================
     st.sidebar.markdown("---")
-    st.sidebar.header("📥 Exportar Datos")
+    st.sidebar.header("Exportar Datos")
     
     # Convertir a CSV
     csv = df.to_csv(index=False, encoding='utf-8')
     
     st.sidebar.download_button(
-        label="📄 Descargar CSV",
+        label="Descargar CSV",
         data=csv,
         file_name=f"gastos_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
         mime="text/csv"
