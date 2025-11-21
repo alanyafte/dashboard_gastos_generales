@@ -354,10 +354,13 @@ def crear_grafico_tendencias_cuentas(df):
         legend=dict(
             orientation="h",
             yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1
-        )
+            y=-0.3,  # Mover la leyenda más abajo
+            xanchor="center",
+            x=0.5
+        ),
+        margin=dict(t=60, b=80, l=60, r=60),  # Ajustar márgenes
+        title_x=0.5,  # Centrar el título
+        title_y=0.95  # Mover el título más arriba
     )
     return fig
 
