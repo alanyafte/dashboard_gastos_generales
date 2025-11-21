@@ -359,7 +359,7 @@ def crear_grafico_tendencias_cuentas(df):
             x=0.5
         ),
         margin=dict(t=60, b=80, l=60, r=60),  # Ajustar márgenes
-        title_x=0.5,  # Centrar el título
+        title_x=0.2,  # Centrar el título
         title_y=0.95  # Mover el título más arriba
     )
     return fig
