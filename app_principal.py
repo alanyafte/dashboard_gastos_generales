@@ -35,7 +35,7 @@ def cargar_datos():
         gc = gspread.authorize(credentials)
         
         # Cargar datos
-        spreadsheet = gc.open_by_key(st.secrets["SPREADSHEET_ID"])
+        spreadsheet = gc.open_by_key(st.secrets["134YXDwV5Fe17Vt-tFh1GzC33f2zFVey75AALv5X-RNc"])
         worksheet = spreadsheet.worksheet("registro_gastos")
         datos = worksheet.get_all_records()
         df = pd.DataFrame(datos)
