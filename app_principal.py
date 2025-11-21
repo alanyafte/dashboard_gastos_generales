@@ -458,6 +458,51 @@ def crear_treemap_subcuentas(df):
     )
     return fig
 
+def mostrar_filas_excluidas():
+    """Muestra SOLO las filas excluidas - Versión básica"""
+    
+    st.title("🔍 Filas Excluidas de la Suma")
+    
+    # Cargar datos originales
+    df_raw = cargar_datos()
+    df_limpio = limpiar_datos(df_raw)
+    
+    # Identificar filas excluidas
+    df_raw_clean = df_raw.copy()
+    df_raw_clean.columns = [col.lower().strip() for col in df_raw_clean.columns]
+    
+    # Aplicar limpieza para identificar exclusiones
+    df_raw_clean['fecha_limpia'] = pd.to_datetime(df_raw_clean['fecha'], errors='coerce', dayfirst=True)
+    df_raw_clean['monto_limpio'] = pd.to_numeric(
+        df_raw_clean['monto'].astype(str)
+        .str.replace('$', '', regex=False)
+        .str.replace(',', '', regex=False)
+        .str.strip(), 
+        errors='coerce'
+    )
+    
+    # Filas excluidas
+    filas_excluidas = df_raw_clean[
+        df_raw_clean['fecha_limpia'].isna() | 
+        df_raw_clean['monto_limpio'].isna()
+    ]
+    
+    st.write(f"**Total filas originales:** {len(df_raw)}")
+    st.write(f"**Total filas después de limpieza:** {len(df_limpio)}")
+    st.write(f"**Filas excluidas:** {len(filas_excluidas)}")
+    
+    # Suma de montos excluidos
+    suma_excluidos = filas_excluidas['monto_limpio'].sum()
+    st.error(f"**Total excluido: ${suma_excluidos:,.2f}**")
+    
+    # Mostrar todas las filas excluidas
+    if not filas_excluidas.empty:
+        st.subheader("📋 Todas las filas excluidas:")
+        st.dataframe(filas_excluidas[['fecha', 'monto', 'proveedor', 'descripcion']])
+    else:
+        st.success("✅ No hay filas excluidas")
+
+
 # =============================================================================
 # INTERFAZ PRINCIPAL
 # =============================================================================
@@ -748,6 +793,8 @@ def main():
         - **Ultima actualizacion:** {datetime.now().strftime('%d/%m/%Y %H:%M')}
         """
     )
+
+mostrar_filas_excluidas()
 
 if __name__ == "__main__":
     main()
