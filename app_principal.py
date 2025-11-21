@@ -348,13 +348,13 @@ def crear_grafico_tendencias_cuentas(df):
     )
     
     fig.update_layout(
-        height=400,
+        height=480,
         template='plotly_white',
         hovermode='x unified',
         legend=dict(
             orientation="h",
             yanchor="bottom",
-            y=-0.3,  # Mover la leyenda más abajo
+            y=-0.7,  # Mover la leyenda más abajo
             xanchor="center",
             x=0.5
         ),
