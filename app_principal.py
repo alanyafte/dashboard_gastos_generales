@@ -268,19 +268,19 @@ def crear_grafico_pareto_subcuentas(df):
         ))
         
         # Agregar anotación con información
-        fig.add_annotation(
-            x=subcuenta_80,
-            y=85,
-            text=f"80% del gasto<br>con {punto_80 + 1} subcuentas<br>de {len(subcuentas)} totales",
-            showarrow=True,
-            arrowhead=2,
-            arrowsize=1,
-            arrowwidth=2,
-            arrowcolor="red",
-            bgcolor="white",
-            bordercolor="red",
-            borderwidth=1
-        )
+        #fig.add_annotation(
+            #x=subcuenta_80,
+            #y=85,
+            #text=f"80% del gasto<br>con {punto_80 + 1} subcuentas<br>de {len(subcuentas)} totales",
+            #showarrow=True,
+            #arrowhead=2,
+            #arrowsize=1,
+            #arrowwidth=2,
+            #arrowcolor="red",
+            #bgcolor="white",
+            #bordercolor="red",
+            #borderwidth=1
+        #)
         
         # Agregar línea vertical desde el punto 80%
         fig.add_shape(
